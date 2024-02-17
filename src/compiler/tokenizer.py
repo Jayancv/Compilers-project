@@ -15,7 +15,7 @@ def tokenize(source_code: str) -> list[Token]:
     whitespace_rex = re.compile(r'\s+')
     integer_rex = re.compile(r'[0-9]+')
     identifier_rex = re.compile(r'[a-zA-Z_][a-zA-Z0-9_]*')
-    operator_rex = re.compile(r'[+-]')
+    operator_rex = re.compile(r'[<>*/+-]')
     parenthesis_rex = re.compile(r'[(){}]')
 
     position = 0
@@ -51,6 +51,7 @@ def tokenize(source_code: str) -> list[Token]:
             position = match.end()
             continue
 
-        raise Exception(f'Tokenization failed near {source_code[position:(position+10)]}')  #TODO make this more meaingful line col
+        raise Exception(
+            f'Tokenization failed near {source_code[position:(position + 10)]}')  # TODO make this more meaingful line col
 
     return result

@@ -13,6 +13,8 @@ def parser(tokens: list[Token]) -> ast.Expression:
 
     def consume() -> Token:
         token = peek()
+        if expected is not None and token.text != expected:
+            raise Exception(f'Expected "{expected}", got "{token.text}" ')
         nonlocal pos
         pos += 1
         return token
@@ -25,12 +27,63 @@ def parser(tokens: list[Token]) -> ast.Expression:
         else:
             raise Exception(f'Expected literal, Found "{token.text}"')
 
+    def parse_factors() -> ast.Expression:
+        if peek().text == '(':
+            return parse_parenthesize_expression()
+        if peek().text == 'if':
+            return parse_if_expression()
+        elif peek().type == 'int_literal':
+            return parse_literal()
+        else:
+            raise Exception(f'Unexpected "{peek().text}" ')
+
+    def parse_parenthesize_expression() -> ast.Expression:
+        consume('(')
+        expr = parse_expression()
+        consume(')')
+        return expr
+
+    def parse_terms() -> ast.Expression:
+        left: ast.Expression = parse_factors()
+        while peek().text in ['*', '/']:
+            op = consume()
+            right = parse_factors()
+            left = ast.TreeOperator(left, op.text, right)
+        return left
+
+    def parse_polynomial() -> ast.Expression:
+        left: ast.Expression = parse_terms()
+        while peek().text in ['+', '-']:
+            op = consume()
+            right = parse_terms()
+            left = ast.TreeOperator(left, op.text, right)
+
+        return left
+
     def parse_expression() -> ast.Expression:
-        left= parse_literal()
-        op = consume()
-        if op.text not in ['+', '-', '*', '/']:
-            raise Exception(f'Expected literal, Found "{op.text}"')
-        right = parse_literal()
-        return ast.TreeOperator(left, op.text, right)
+        left: ast.Expression = parse_polynomial()
+        while peek().text in ['<', '>']:
+            op = consume()
+            right = parse_polynomial()
+            left = ast.TreeOperator(left, op.text, right)
+
+        return left
+
+    def parse_if_expression() -> ast.Expression:
+        consume('if')
+        condition = parse_expression()
+        consume('then')
+        then_clause = parse_expression()
+        if peek().text == 'else':
+            consume('else')
+            else_clause = parse_expression()
+        else:
+            else_clause = None
+
+        return ast.IfExpression(condition, then_clause, else_clause)
+
 
     return parse_expression()
+
+
+# TODO right associativity
