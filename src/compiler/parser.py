@@ -11,7 +11,7 @@ def parser(tokens: list[Token]) -> ast.Expression:
         else:
             return Token(type='end', text='')
 
-    def consume() -> Token:
+    def consume(expected: str | None = None) -> Token:
         token = peek()
         if expected is not None and token.text != expected:
             raise Exception(f'Expected "{expected}", got "{token.text}" ')
@@ -82,8 +82,6 @@ def parser(tokens: list[Token]) -> ast.Expression:
 
         return ast.IfExpression(condition, then_clause, else_clause)
 
-
     return parse_expression()
-
 
 # TODO right associativity
