@@ -1,5 +1,10 @@
 import sys
 
+from compiler.ir_generator import generate_ir
+from compiler.parser import parser
+from compiler.tokenizer import tokenize
+from compiler.type_checker import typecheck
+
 # TODO(student): add more commands as needed
 usage = f"""
 Usage: {sys.argv[0]} <command> [source_code_file]
@@ -42,6 +47,13 @@ def main() -> int:
     if command == 'interpret':
         source_code = read_source_code()
         ...  # TODO(student)
+    elif command == 'ir':
+        source_code = read_source_code()
+        tokens = tokenize(source_code)
+        ast_nodes = parser(tokens)
+        typecheck(ast_nodes)
+        irs = generate_ir(ast_nodes)
+        print("\n".join([str(ins) for ins in irs]))
     else:
         print(f"Error: unknown command: {command}\n\n{usage}", file=sys.stderr)
         return 1
