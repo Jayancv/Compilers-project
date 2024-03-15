@@ -1,5 +1,7 @@
 import sys
 
+from compiler.assembler import assemble
+from compiler.assembly_generator import generate_assembly
 from compiler.ir_generator import generate_ir
 from compiler.parser import parser
 from compiler.tokenizer import tokenize
@@ -54,6 +56,22 @@ def main() -> int:
         typecheck(ast_nodes)
         irs = generate_ir(ast_nodes)
         print("\n".join([str(ins) for ins in irs]))
+    elif command == 'asm':
+        source_code = read_source_code()
+        tokens = tokenize(source_code)
+        ast_nodes = parser(tokens)
+        typecheck(ast_nodes)
+        irs = generate_ir(ast_nodes)
+        asm_code = generate_assembly(irs)
+        print(asm_code)
+    elif command == 'compile':
+        source_code = read_source_code()
+        tokens = tokenize(source_code)
+        ast_nodes = parser(tokens)
+        typecheck(ast_nodes)
+        irs = generate_ir(ast_nodes)
+        asm_code = generate_assembly(irs)
+        assemble(asm_code,'compile_program')
     else:
         print(f"Error: unknown command: {command}\n\n{usage}", file=sys.stderr)
         return 1
