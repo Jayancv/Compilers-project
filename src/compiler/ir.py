@@ -31,3 +31,20 @@ class LoadIntConst(Instruction):
 class Copy(Instruction):
     source: IRVar
     dest: IRVar
+
+
+@dataclass(frozen=True)
+class Label(Instruction):
+    name: str
+
+
+@dataclass(frozen=True)
+class Jump(Instruction):
+    label: Label
+
+
+@dataclass(frozen=True)
+class CondJump(Instruction):
+    cond: IRVar
+    then_label: Label
+    else_label: Label
