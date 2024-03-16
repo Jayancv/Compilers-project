@@ -1,7 +1,7 @@
 import dataclasses
 
-from compiler import ir
-from compiler.intrinsics import all_intrinsics, IntrinsicArgs
+from src.compiler import ir
+from src.compiler.intrinsics import all_intrinsics, IntrinsicArgs
 
 
 def generate_assembly(instructions: list[ir.Instruction]) -> str:

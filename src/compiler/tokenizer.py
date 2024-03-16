@@ -2,7 +2,9 @@ import re
 from dataclasses import dataclass
 from typing import Literal
 
-TokenType = Literal["int_literal", "operators", "identifier", "parenthesis", "comment", "end"]
+TokenType = Literal[
+    "int_literal", "bool_literal", "bool_operators", "operators", "identifier", "parenthesis", "comment", "keyword",
+    "null_literal", "unary_operator", "punctuation", "end"]
 
 
 @dataclass(frozen=True)
@@ -12,21 +14,37 @@ class SourceLocation:
 
 
 @dataclass(frozen=True)
+class DummyLocation(SourceLocation):
+    def __eq__(self, other: object) -> bool:
+        return isinstance(other, SourceLocation)
+
+
+@dataclass(frozen=True)
 class Token:
     type: TokenType
     text: str
     source_location: SourceLocation
 
 
+def add_token(result: list[Token], token_type: TokenType, text: str, line_num: int, column_num: int) -> int:
+    result.append(Token(type=token_type, text=text, source_location=SourceLocation(line=line_num, column=column_num)))
+    return len(text)
+
+
 def tokenize(source_code: str) -> list[Token]:
     whitespace_rex = re.compile(r'\s+')
     integer_rex = re.compile(r'[0-9]+')
+    bool_rex = re.compile(r'true|false')
+    bool_operator_rex = re.compile(r'and|or')
+    unary_rex = re.compile(r'not')
     identifier_rex = re.compile(r'[a-zA-Z_][a-zA-Z0-9_]*')
-    # operator_rex = re.compile(r'[<>*/+-]'
     operator_rex = re.compile(r'==|!=|<=|>=|[+\-*/=<>]')
     parenthesis_rex = re.compile(r'[(){}]')
+    punctuation_rex = re.compile(r'[,:;]')
     single_line_comment_rex = re.compile(r'//.*?(?:\n|$)')
     multi_line_comment_rex = re.compile(r'/\*.*?\*/', re.DOTALL)
+    keywords_rex = re.compile(r'if|then|else|while|do|var|return')
+    null_rex = re.compile(r'null')
 
     position = 0
     line_num = 1
@@ -95,39 +113,59 @@ def tokenize(source_code: str) -> list[Token]:
                 position = len(source_code)
                 continue
 
-        match = identifier_rex.match(source_code, position)
-        if match is not None:
-            result.append(Token(type='identifier', text=source_code[position:match.end()],
-                                source_location=SourceLocation(line=line_num, column=column_num)))
-            column_num += len(match.group())
-            position = match.end()
-            continue
+        # match = keywords_rex.match(source_code, position)
+        # if match is not None:
+        #     result.append(Token(type='keyword', text=source_code[position:match.end()],
+        #                         source_location=SourceLocation(line=line_num, column=column_num)))
+        #     column_num += len(match.group())
+        #     position = match.end()
+        #     continue
+        #
+        # match = identifier_rex.match(source_code, position)
+        # if match is not None:
+        #     result.append(Token(type='identifier', text=source_code[position:match.end()],
+        #                         source_location=SourceLocation(line=line_num, column=column_num)))
+        #     column_num += len(match.group())
+        #     position = match.end()
+        #     continue
+        #
+        # match = integer_rex.match(source_code, position)
+        # if match is not None:
+        #     result.append(Token(type='int_literal', text=source_code[position:match.end()],
+        #                         source_location=SourceLocation(line=line_num, column=column_num)))
+        #     column_num += len(match.group())
+        #     position = match.end()
+        #     continue
+        #
+        # match = operator_rex.match(source_code, position)
+        # if match is not None:
+        #     result.append(Token(type='operators', text=source_code[position:match.end()],
+        #                         source_location=SourceLocation(line=line_num, column=column_num)))
+        #     column_num += len(match.group())
+        #     position = match.end()
+        #     continue
+        #
+        # match = parenthesis_rex.match(source_code, position)
+        # if match is not None:
+        #     result.append(Token(type='parenthesis', text=source_code[position:match.end()],
+        #                         source_location=SourceLocation(line=line_num, column=column_num)))
+        #     column_num += len(match.group())
+        #     position = match.end()
+        #     continue
 
-        match = integer_rex.match(source_code, position)
-        if match is not None:
-            result.append(Token(type='int_literal', text=source_code[position:match.end()],
-                                source_location=SourceLocation(line=line_num, column=column_num)))
-            column_num += len(match.group())
-            position = match.end()
-            continue
-
-        match = operator_rex.match(source_code, position)
-        if match is not None:
-            result.append(Token(type='operators', text=source_code[position:match.end()],
-                                source_location=SourceLocation(line=line_num, column=column_num)))
-            column_num += len(match.group())
-            position = match.end()
-            continue
-
-        match = parenthesis_rex.match(source_code, position)
-        if match is not None:
-            result.append(Token(type='parenthesis', text=source_code[position:match.end()],
-                                source_location=SourceLocation(line=line_num, column=column_num)))
-            column_num += len(match.group())
-            position = match.end()
-            continue
-
-        raise Exception(
-            f'Tokenization failed at line {line_num}, column {column_num}: near {source_code[position:(position + 10)]}')
+        # Match tokens and add to result using the add_token function
+        for token_rex, token_type in [(keywords_rex, 'keyword'), (bool_rex, 'bool_literal'),
+                                      (bool_operator_rex, 'bool_operator'), (unary_rex, 'unary_operator'),
+                                      (null_rex, 'null_literal'), (identifier_rex, 'identifier'),
+                                      (integer_rex, 'int_literal'), (operator_rex, 'operators'),
+                                      (parenthesis_rex, 'parenthesis'), (punctuation_rex, 'punctuation')]:
+            match = token_rex.match(source_code, position)
+            if match is not None:
+                column_num += add_token(result, token_type, match.group(), line_num, column_num)
+                position = match.end()
+                break
+        else:
+            raise Exception(
+                f'Tokenization failed at line {line_num}, column {column_num}: near {source_code[position:(position + 10)]}')
 
     return result

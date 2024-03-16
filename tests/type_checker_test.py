@@ -1,7 +1,7 @@
-from compiler.parser import parser
-from compiler.tokenizer import tokenize
-from compiler.type_checker import typecheck
-from compiler.types import Int, Bool, Unit
+from src.compiler.parser import parser
+from src.compiler.tokenizer import tokenize
+from src.compiler.type_checker import typecheck
+from src.compiler.types import Int, Bool, Unit
 
 
 def test_type_checker() -> None:

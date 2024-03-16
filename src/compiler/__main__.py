@@ -1,11 +1,11 @@
 import sys
 
-from compiler.assembler import assemble
-from compiler.assembly_generator import generate_assembly
-from compiler.ir_generator import generate_ir
-from compiler.parser import parser
-from compiler.tokenizer import tokenize
-from compiler.type_checker import typecheck
+from src.compiler.assembler import assemble
+from src.compiler.assembly_generator import generate_assembly
+from src.compiler.ir_generator import generate_ir
+from src.compiler.parser import parser
+from src.compiler.tokenizer import tokenize
+from src.compiler.type_checker import typecheck
 
 # TODO(student): add more commands as needed
 usage = f"""

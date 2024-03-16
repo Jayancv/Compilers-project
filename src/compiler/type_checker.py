@@ -1,5 +1,5 @@
-from compiler import ast
-from compiler.types import Type, Int, Bool, Unit
+from src.compiler import ast
+from src.compiler.types import Type, Int, Bool, Unit
 
 
 def typecheck(node: ast.Expression) -> Type:

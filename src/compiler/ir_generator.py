@@ -1,5 +1,5 @@
-from compiler import ir, ast
-from compiler.ir import IRVar, Instruction, Label
+from src.compiler import ir, ast
+from src.compiler.ir import IRVar, Instruction, Label
 import numpy as np
 
 

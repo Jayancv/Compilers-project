@@ -43,9 +43,9 @@ def test_tokenizer() -> None:
     ]
 
     assert tokenize("if  3\nwhile") == [
-        Token(type='identifier', text='if', source_location=SourceLocation(line=1, column=1)),
+        Token(type='keyword', text='if', source_location=SourceLocation(line=1, column=1)),
         Token(type='int_literal', text='3', source_location=SourceLocation(line=1, column=5)),
-        Token(type='identifier', text='while', source_location=SourceLocation(line=2, column=1))
+        Token(type='keyword', text='while', source_location=SourceLocation(line=2, column=1))
     ]
 
     assert tokenize("  \n Hello         \n  // Comment  \n jayan") == [

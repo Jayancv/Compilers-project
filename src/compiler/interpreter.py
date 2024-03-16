@@ -1,6 +1,6 @@
 from typing import Any
 
-from compiler import ast
+from src.compiler import ast
 
 Value = int | bool | None
 
