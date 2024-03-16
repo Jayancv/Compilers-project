@@ -6,18 +6,24 @@ TokenType = Literal["int_literal", "operators", "identifier", "parenthesis", "co
 
 
 @dataclass(frozen=True)
+class SourceLocation:
+    line: int
+    column: int
+
+
+@dataclass(frozen=True)
 class Token:
     type: TokenType
     text: str
-    line: int
-    column: int
+    source_location: SourceLocation
 
 
 def tokenize(source_code: str) -> list[Token]:
     whitespace_rex = re.compile(r'\s+')
     integer_rex = re.compile(r'[0-9]+')
     identifier_rex = re.compile(r'[a-zA-Z_][a-zA-Z0-9_]*')
-    operator_rex = re.compile(r'[<>*/+-]')
+    # operator_rex = re.compile(r'[<>*/+-]'
+    operator_rex = re.compile(r'==|!=|<=|>=|[+\-*/=<>]')
     parenthesis_rex = re.compile(r'[(){}]')
     single_line_comment_rex = re.compile(r'//.*?(?:\n|$)')
     multi_line_comment_rex = re.compile(r'/\*.*?\*/', re.DOTALL)
@@ -60,16 +66,16 @@ def tokenize(source_code: str) -> list[Token]:
         if match is not None:
             if not in_multi_line_comment:
                 in_multi_line_comment = True
-            if '\n' in match.group():    # get all lines
+            if '\n' in match.group():  # get all lines
                 lines = match.group().split('\n')
                 for line in lines[:-1]:
                     line_num += 1
                     column_num = 1
-                if lines[-1]:           # last line
+                if lines[-1]:  # last line
                     column_num = len(lines[-1]) - 2
-            else:                         # single line
+            else:  # single line
                 column_num += len(match.group())
-            position = match.end()-2
+            position = match.end() - 2
             continue
 
         # Check if multi-line comment ends
@@ -91,33 +97,37 @@ def tokenize(source_code: str) -> list[Token]:
 
         match = identifier_rex.match(source_code, position)
         if match is not None:
-            result.append(Token(type='identifier', text=source_code[position:match.end()], line=line_num, column=column_num))
+            result.append(Token(type='identifier', text=source_code[position:match.end()],
+                                source_location=SourceLocation(line=line_num, column=column_num)))
             column_num += len(match.group())
             position = match.end()
             continue
 
         match = integer_rex.match(source_code, position)
         if match is not None:
-            result.append(Token(type='int_literal', text=source_code[position:match.end()], line=line_num, column=column_num))
+            result.append(Token(type='int_literal', text=source_code[position:match.end()],
+                                source_location=SourceLocation(line=line_num, column=column_num)))
             column_num += len(match.group())
             position = match.end()
             continue
 
         match = operator_rex.match(source_code, position)
         if match is not None:
-            result.append(Token(type='operators', text=source_code[position:match.end()], line=line_num, column=column_num))
+            result.append(Token(type='operators', text=source_code[position:match.end()],
+                                source_location=SourceLocation(line=line_num, column=column_num)))
             column_num += len(match.group())
             position = match.end()
             continue
 
         match = parenthesis_rex.match(source_code, position)
         if match is not None:
-            result.append(Token(type='parenthesis', text=source_code[position:match.end()], line=line_num, column=column_num))
+            result.append(Token(type='parenthesis', text=source_code[position:match.end()],
+                                source_location=SourceLocation(line=line_num, column=column_num)))
             column_num += len(match.group())
             position = match.end()
             continue
 
         raise Exception(
-            f'Tokenization failed near {source_code[position:(position + 10)]}')  # TODO make this more meaingful line col
+            f'Tokenization failed at line {line_num}, column {column_num}: near {source_code[position:(position + 10)]}')
 
     return result
