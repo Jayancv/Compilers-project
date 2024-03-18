@@ -1,3 +1,5 @@
+from typing import List
+
 from src.compiler import ast
 from src.compiler.ast import Identifier
 
@@ -25,6 +27,55 @@ def parser(tokens: list[Token]) -> ast.Expression:
         pos += 1
         return token
 
+    def parse_module() -> ast.Module:
+        expressions: List[ast.Expression] = []
+        functions: List[ast.FunctionDef] = []
+
+        while pos < len(tokens):
+            if peek().text == 'fun':
+                fun = parse_fun_definition()
+                functions.append(fun)
+            else:
+                expression = parse_expression()
+                expressions.append(expression)
+
+        return ast.Module(functions=functions, expr=ast.Block(SourceLocation(line=1, column=1), expressions))
+
+    def parse_fun_definition() -> ast.FunctionDef:
+        token = peek()
+        consume('fun')
+        name = parse_identifier()
+        consume('(')
+        params: list[ast.Identifier] = []
+        param_types: list[ast.BasicType] = []
+
+        while peek().text != ')':
+            if len(params) > 0:
+                consume(',')
+            param = parse_identifier()
+            consume(':')
+            param_type = ast.BasicType(consume().text)
+
+            params.append(param)
+            param_types.append(param_type)
+
+        consume(')')
+        consume(':')
+        return_type = ast.BasicType(consume().text)
+        body = parse_blocks()
+        return ast.FunctionDef(token.source_location, name, param_types, body, return_type)
+
+    def parse_return() -> ast.Return:
+        token = peek()
+        consume('return')
+        if peek().text == '}':
+            value = None
+        else:
+            value = parse_expression()
+        if peek().text != '}':
+            raise Exception(f'Return statement must be the last statement in a block')
+        return ast.Return(token.source_location, value)
+
     def parse_literal() -> ast.Literal:
         token = peek()
         if token.type == 'int_literal':
@@ -40,6 +91,16 @@ def parser(tokens: list[Token]) -> ast.Expression:
             return ast.Identifier(name=token.text, location=token.source_location)
         else:
             raise Exception(f'Expected identifier, Found "{token.text}"')
+
+    def parse_break_and_continue() -> ast.Expression:
+        token = peek()
+        if token.text == 'break':
+            consume('break')
+            name = 'break'
+        else:
+            consume('continue')
+            name = 'continue'
+        return ast.BreakContinue(token.source_location, name)
 
     def parse_bool_literal() -> ast.Literal:
         token = peek()
@@ -76,6 +137,8 @@ def parser(tokens: list[Token]) -> ast.Expression:
                 return parse_if_expression()
             elif peek().text == 'while':
                 return parse_while_loop()
+            elif peek().text in ['break', 'continue']:
+                return parse_break_and_continue()
         elif peek().type == 'identifier':
             identifier = parse_identifier()
             if peek().text == '(':  # function calls
@@ -266,8 +329,14 @@ def parser(tokens: list[Token]) -> ast.Expression:
         while peek().text != '}':
             if peek().type == 'end':
                 raise Exception(f'{peek().source_location}: expected a "}}"')
+            if peek().text == 'return':
+                block.statements.append(parse_return())
+                semicolon = False
+            else :
+                statement = parse_expression()
+                block.statements.append(statement)
 
-            block.statements.append(parse_expression())
+            # block.statements.append(parse_expression())
             if peek().text == ';':
                 consume(';')
                 if peek().text == '}':

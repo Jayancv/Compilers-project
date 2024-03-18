@@ -1,0 +1,15 @@
+1
+fun square(x: Int): Int {
+    return x * x;
+}
+
+fun vec_len_squared(x: Int, y: Int): Int {
+    return square(x) + square(y);
+}
+
+fun print_int_twice(x: Int) {
+    print_int(x);
+    print_int(x);
+}
+
+print_int_twice(vec_len_squared(3, 4));

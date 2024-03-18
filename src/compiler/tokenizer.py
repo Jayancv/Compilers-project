@@ -46,7 +46,7 @@ def tokenize(source_code: str) -> list[Token]:
     punctuation_rex = re.compile(r'[,:;]')
     single_line_comment_rex = re.compile(r'//.*?(?:\n|$)')
     multi_line_comment_rex = re.compile(r'/\*.*?\*/', re.DOTALL)
-    keywords_rex = re.compile(r'if|then|else|while|do|var|return')
+    keywords_rex = re.compile(r'if|then|else|while|do|var|return|break|continue|fun')
     null_rex = re.compile(r'null')
 
     position = 0

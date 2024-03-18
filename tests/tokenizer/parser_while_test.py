@@ -22,3 +22,21 @@ def test_parse_while_loop() -> None:
             left=ast.Literal(location=SourceLocation(line=1, column=14), value=1),
             operator='+',
             right=ast.Literal(location=SourceLocation(line=1, column=18), value=2)))
+
+
+def test_parser_break_loops() -> None:
+    assert parser(tokenize("while true do break")) == ast.WhileLoop(
+        loc,
+        condition=ast.Literal(loc, True),
+        do_action=ast.BreakContinue(loc, 'break')
+    )
+
+    assert parser(tokenize("{if true then continue}")) == ast.Block(
+        loc,
+        statements=[ast.IfExpression(
+            loc,
+            condition=ast.Literal(loc, True),
+            then_clause=ast.BreakContinue(loc, 'continue'),
+            else_clause=None
+        )]
+    )

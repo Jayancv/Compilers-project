@@ -42,10 +42,18 @@ def test_tokenizer() -> None:
         Token(type='parenthesis', text=')', source_location=SourceLocation(line=1, column=12)),
     ]
 
-    assert tokenize("if  3\nwhile") == [
+    assert tokenize("if  3\nwhile do if true break; else continue") == [
         Token(type='keyword', text='if', source_location=SourceLocation(line=1, column=1)),
         Token(type='int_literal', text='3', source_location=SourceLocation(line=1, column=5)),
-        Token(type='keyword', text='while', source_location=SourceLocation(line=2, column=1))
+        Token(type='keyword', text='while', source_location=SourceLocation(line=2, column=1)),
+        Token(type='keyword', text='do', source_location=SourceLocation(line=2, column=7)),
+        Token(type='keyword', text='if', source_location=SourceLocation(line=2, column=10)),
+        Token(type='bool_literal', text='true', source_location=SourceLocation(line=2, column=13)),
+        Token(type='keyword', text='break', source_location=SourceLocation(line=2, column=18)),
+        Token(type='punctuation', text=';', source_location=SourceLocation(line=2, column=23)),
+        Token(type='keyword', text='else', source_location=SourceLocation(line=2, column=25)),
+        Token(type='keyword', text='continue', source_location=SourceLocation(line=2, column=30)),
+
     ]
 
     assert tokenize("while x>0 do ; return null") == [

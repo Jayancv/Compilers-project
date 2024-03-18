@@ -77,7 +77,6 @@ def typecheck(node: ast.Expression | None, symtab: SymTab) -> Type:
                     f"'then' and 'else' having different types: {then_cl} and {else_cl} at {node.location.__str__()}")
             return set_node_type(node, then_cl)
 
-        # TODO need to update this
         case ast.Identifier():
             context = find_context(symtab, node.name)
             if context is not None:
@@ -158,6 +157,14 @@ def typecheck(node: ast.Expression | None, symtab: SymTab) -> Type:
             typecheck(node.do_action, symtab)
 
             return set_node_type(node, Unit)
+
+        case ast.BreakContinue():
+            return set_node_type(node, Unit)
+
+        # case ast.Return():
+        #     if node.value is None:
+        #         return set_node_type(node, Unit)
+        #     return set_node_type(node.value, symtab)
 
         case _:
             raise Exception(f"Unsupported TAS Node {node} at {node.location.__str__()}")

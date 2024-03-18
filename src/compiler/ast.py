@@ -1,7 +1,7 @@
 from dataclasses import dataclass, field
 
 from src.compiler.tokenizer import SourceLocation
-from src.compiler.types import Type, Unit
+from src.compiler.types import Type, Unit, BasicType
 
 
 @dataclass
@@ -83,3 +83,36 @@ class Block(Expression):
 class FunctionCall(Expression):
     call: Identifier
     args: list[Expression]
+
+
+@dataclass
+class BreakContinue(Expression):
+    name: str
+
+    def __eq__(self, other: object) -> bool:
+        if not isinstance(other, BreakContinue):
+            return NotImplemented
+
+        return self.name == other.name
+
+
+@dataclass
+class Return(Expression):
+    value: Expression | None
+
+
+@dataclass
+class FunctionDef():
+    location: SourceLocation
+    name: Identifier
+    params: list[Identifier]
+    param_types: list[BasicType]
+    body: Block
+    return_type: BasicType
+
+
+@dataclass
+class Module:
+    "base class for expressions and fun definitions"
+    functions: list[FunctionDef]
+    expr: Expression | None

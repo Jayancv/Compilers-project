@@ -15,6 +15,7 @@ def generate_ir(root_types: dict[IRVar, Type], root_node: ast.Expression) -> dic
     next_var_num = 1
     next_lbl_num = 1
     instructions: dict[str, list[ir.Instruction]] = {'main': []}
+    loop_labels: list[tuple[ir.Label, ir.Label]] = []
 
     def new_var(type: Type) -> IRVar:
         nonlocal next_var_num
@@ -159,6 +160,8 @@ def generate_ir(root_types: dict[IRVar, Type], root_node: ast.Expression) -> dic
                 l_do_action = new_lbl(node.location)
                 l_end = new_lbl(node.location)
 
+                loop_labels.append((l_start, l_end))
+
                 instructions[func_name].append(l_start)
                 condition = visit(st, node.condition, func_name)
                 instructions[func_name].append(ir.CondJump(node.location, condition, l_do_action, l_end))
@@ -168,11 +171,23 @@ def generate_ir(root_types: dict[IRVar, Type], root_node: ast.Expression) -> dic
                 instructions[func_name].append(ir.Jump(node.location, l_start))
 
                 instructions[func_name].append(l_end)
+                loop_labels.pop()
 
                 return var_unit
 
+            case ast.BreakContinue():
+                if not loop_labels:
+                    raise Exception(f"While loop not available at {node.location.__str__()}")
+
+                l_start, l_end = loop_labels[-1]
+                if node.name == 'break':
+                    instructions[func_name].append(ir.Jump(node.location, l_end))
+                else:
+                    instructions[func_name].append(ir.Jump(node.location, l_start))
+                return var_unit
+
             case _:
-                raise Exception(f"Unsupported AST Node: {node}")
+                raise Exception(f"Unsupported AST Node: {node} at {node.location.__str__()}")
 
     root_symtab = SymTab(locals={str: IRVar}, parent=None)
     for v in root_types.keys():
