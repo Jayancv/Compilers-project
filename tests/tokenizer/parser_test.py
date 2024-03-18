@@ -145,3 +145,10 @@ def test_parser() -> None:
         then_clause=ast.TreeOperator(loc, left=ast.Literal(loc, 2), operator='*', right=ast.Literal(loc, 3)),
         else_clause=ast.TreeOperator(loc, left=ast.Literal(loc, 5), operator='/', right=ast.Literal(loc, 6))
     )
+
+    assert parser(tokenize('if true then 2*3')) == ast.IfExpression(
+        location=loc,
+        condition=ast.Literal(loc,True),
+        then_clause=ast.TreeOperator(loc, left=ast.Literal(loc, 2), operator='*', right=ast.Literal(loc, 3)),
+        else_clause=None
+    )

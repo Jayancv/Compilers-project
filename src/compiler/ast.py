@@ -1,11 +1,12 @@
-from dataclasses import dataclass
+from dataclasses import dataclass, field
 
 from src.compiler.tokenizer import SourceLocation
-from src.compiler.types import Type
+from src.compiler.types import Type, Unit
+
 
 @dataclass
 class AstType:
-    """Abstract base class for AST tree node Type"""
+    """Abstract base class for AST tree type node"""
 
 
 @dataclass
@@ -16,10 +17,13 @@ class TypeInt(AstType):
 @dataclass
 class TypeBool(AstType):
     type: str
+
+
 @dataclass
 class Expression:
     """Abstract base class for AST tree nodes"""
     location: SourceLocation
+    type: Type = field(kw_only=True, default=Unit)  # use for type checking
 
 
 @dataclass
@@ -75,4 +79,7 @@ class Block(Expression):
     statements: list[Expression]
 
 
-
+@dataclass
+class FunctionCall(Expression):
+    call: Identifier
+    args: list[Expression]

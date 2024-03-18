@@ -48,6 +48,17 @@ def test_tokenizer() -> None:
         Token(type='keyword', text='while', source_location=SourceLocation(line=2, column=1))
     ]
 
+    assert tokenize("while x>0 do ; return null") == [
+        Token(type='keyword', text='while', source_location=SourceLocation(line=1, column=1)),
+        Token(type='identifier', text='x', source_location=SourceLocation(line=1, column=7)),
+        Token(type='operators', text='>', source_location=SourceLocation(line=1, column=8)),
+        Token(type='int_literal', text='0', source_location=SourceLocation(line=1, column=9)),
+        Token(type='keyword', text='do', source_location=SourceLocation(line=1, column=11)),
+        Token(type='punctuation', text=';', source_location=SourceLocation(line=1, column=14)),
+        Token(type='keyword', text='return', source_location=SourceLocation(line=1, column=16)),
+        Token(type='null_literal', text='null', source_location=SourceLocation(line=1, column=23))
+    ]
+
     assert tokenize("  \n Hello         \n  // Comment  \n jayan") == [
         Token(type='identifier', text='Hello', source_location=SourceLocation(line=2, column=2)),
         Token(type='identifier', text='jayan', source_location=SourceLocation(line=4, column=2))

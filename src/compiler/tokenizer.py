@@ -7,14 +7,17 @@ TokenType = Literal[
     "null_literal", "unary_operator", "punctuation", "end"]
 
 
-@dataclass(frozen=True)
+@dataclass
 class SourceLocation:
     line: int
     column: int
 
+    def __str__(self) -> str:
+        return f'line: {self.line}, column : {self.column}'
 
-@dataclass(frozen=True)
-class DummyLocation(SourceLocation):
+
+@dataclass
+class DummyLocation(SourceLocation):  # for skip location validation in test
     def __eq__(self, other: object) -> bool:
         return isinstance(other, SourceLocation)
 
@@ -112,46 +115,6 @@ def tokenize(source_code: str) -> list[Token]:
             else:
                 position = len(source_code)
                 continue
-
-        # match = keywords_rex.match(source_code, position)
-        # if match is not None:
-        #     result.append(Token(type='keyword', text=source_code[position:match.end()],
-        #                         source_location=SourceLocation(line=line_num, column=column_num)))
-        #     column_num += len(match.group())
-        #     position = match.end()
-        #     continue
-        #
-        # match = identifier_rex.match(source_code, position)
-        # if match is not None:
-        #     result.append(Token(type='identifier', text=source_code[position:match.end()],
-        #                         source_location=SourceLocation(line=line_num, column=column_num)))
-        #     column_num += len(match.group())
-        #     position = match.end()
-        #     continue
-        #
-        # match = integer_rex.match(source_code, position)
-        # if match is not None:
-        #     result.append(Token(type='int_literal', text=source_code[position:match.end()],
-        #                         source_location=SourceLocation(line=line_num, column=column_num)))
-        #     column_num += len(match.group())
-        #     position = match.end()
-        #     continue
-        #
-        # match = operator_rex.match(source_code, position)
-        # if match is not None:
-        #     result.append(Token(type='operators', text=source_code[position:match.end()],
-        #                         source_location=SourceLocation(line=line_num, column=column_num)))
-        #     column_num += len(match.group())
-        #     position = match.end()
-        #     continue
-        #
-        # match = parenthesis_rex.match(source_code, position)
-        # if match is not None:
-        #     result.append(Token(type='parenthesis', text=source_code[position:match.end()],
-        #                         source_location=SourceLocation(line=line_num, column=column_num)))
-        #     column_num += len(match.group())
-        #     position = match.end()
-        #     continue
 
         # Match tokens and add to result using the add_token function
         for token_rex, token_type in [(keywords_rex, 'keyword'), (bool_rex, 'bool_literal'),

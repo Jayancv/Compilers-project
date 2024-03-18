@@ -13,7 +13,6 @@ def test_operators_parser() -> None:
         location=SourceLocation(line=1, column=7),
         left=ast.TreeOperator(location=loc, left=ast.Identifier(SourceLocation(line=1, column=1), name='a'),
                               operator="+",
-                              right=ast.Literal(SourceLocation(line=1, column=5), value=1)
-                              ),
+                              right=ast.Literal(SourceLocation(line=1, column=5), value=1)),
         operator="-",
         right=ast.Literal(SourceLocation(line=1, column=9), value=2))

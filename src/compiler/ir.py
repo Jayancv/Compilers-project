@@ -1,4 +1,8 @@
+import dataclasses
 from dataclasses import dataclass
+from typing import Any
+
+from src.compiler.tokenizer import SourceLocation
 
 
 @dataclass(frozen=True)
@@ -12,7 +16,22 @@ class IRVar:
 @dataclass(frozen=True)
 class Instruction():
     """Base class for IR instructions"""
+    location: SourceLocation
+    def __str__(self) -> str:
+        """Returns a string representation."""
+        def format_value(v: Any) -> str:
+            if isinstance(v, list):
+                return f'[{", ".join(format_value(e) for e in v )}]'
+            else:
+                return str(v)
 
+        args = ', '.join(
+            format_value(getattr(self, field.name))
+            for field in dataclasses.fields(self)
+            if field.name != 'location'
+        )
+
+        return f'{type(self).__name__}({args})'
 
 @dataclass(frozen=True)
 class Call(Instruction):
@@ -24,6 +43,24 @@ class Call(Instruction):
 @dataclass(frozen=True)
 class LoadIntConst(Instruction):
     value: int
+    dest: IRVar
+
+
+@dataclass(frozen=True)
+class LoadBoolConst(Instruction):
+    value: bool
+    dest: IRVar
+
+
+@dataclass(frozen=True)
+class LoadIntParam(Instruction):
+    symbol: IRVar
+    dest: IRVar
+
+
+@dataclass(frozen=True)
+class LoadBoolParam(Instruction):
+    symbol: IRVar
     dest: IRVar
 
 
@@ -48,3 +85,8 @@ class CondJump(Instruction):
     cond: IRVar
     then_label: Label
     else_label: Label
+
+
+@dataclass(frozen=True)
+class Return(Instruction):
+    value: IRVar
